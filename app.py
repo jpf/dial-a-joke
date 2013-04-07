@@ -73,8 +73,7 @@ def tell_joke():
     laugh = random.choice(laughs)
 
     rv = make_joke_response(joke['joke'], joke['via'],
-                            laugh['file'], laugh['via'],
-                            'http://example.com')
+                            laugh['file'], laugh['via'])
     return Response(rv, mimetype='text/xml')
 
 if __name__ == "__main__":
