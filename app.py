@@ -51,7 +51,7 @@ laughs = load_laughs()
 
 def make_joke_response(joke, joke_via,
                        laughtrack, laughtrack_via,
-                       redirect="/"):
+                       redirect=""):
     r = twiml.Response()
     r.say(joke)
     with r.gather(timeout=60, numDigits=1) as g:
