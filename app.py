@@ -5,6 +5,7 @@ import json
 
 from flask import Flask
 from flask import Response
+from twilio import twiml
 app = Flask(__name__)
 
 
@@ -48,19 +49,17 @@ jokes = load_jokes()
 laughs = load_laughs()
 
 
-def make_joke_response(joke, joke_via, laughtrack, laughtrack_via, redirect):
-    rv = ('<Response>' + "\n"
-          '  <Say>%s</Say>' + "\n"
-          '  <!-- joke via: %s -->' + "\n"
-          '  <Gather timeout="60" numDigits="1">' + "\n"
-          '    <Play>%s</Play>' + "\n"
-          '    <!-- audio via: %s -->' + "\n"
-          '  </Gather>' + "\n"
-          '  <Redirect method="POST">%s</Redirect>' + "\n"
-          '</Response>') % (joke, joke_via,
-                            laughtrack, laughtrack_via,
-                            redirect)
-    return rv
+def make_joke_response(joke, joke_via,
+                       laughtrack, laughtrack_via,
+                       redirect="/"):
+    r = twiml.Response()
+    r.say(joke)
+    with r.gather(timeout=60, numDigits=1) as g:
+        g.play(laughtrack)
+    r.redirect(redirect)
+    via = "<!-- joke via: %s laughtrack via: %s -->" % (
+        joke_via, laughtrack_via)
+    return str(r) + via
 
 
 @app.route("/")
