@@ -3,6 +3,10 @@ import os
 import random
 import json
 
+from flask import Flask
+from flask import Response
+app = Flask(__name__)
+
 
 def non_blank_lines_in(filename):
     """
@@ -40,24 +44,43 @@ def load_laughs():
     return rv
 
 jokes = load_jokes()
-joke = random.choice(jokes)
 
 laughs = load_laughs()
-laugh = random.choice(laughs)
 
 
 def make_joke_response(joke, joke_via, laughtrack, laughtrack_via, redirect):
     rv = ('<Response>' + "\n"
           '  <Say>%s</Say>' + "\n"
           '  <!-- joke via: %s -->' + "\n"
-          '  <Play>%s</Play>' + "\n"
-          '  <!-- audio via: %s -->' + "\n"
+          '  <Gather timeout="60" numDigits="1">' + "\n"
+          '    <Play>%s</Play>' + "\n"
+          '    <!-- audio via: %s -->' + "\n"
+          '  </Gather>' + "\n"
           '  <Redirect method="POST">%s</Redirect>' + "\n"
           '</Response>') % (joke, joke_via,
                             laughtrack, laughtrack_via,
                             redirect)
     return rv
 
-print make_joke_response(joke['joke'], joke['via'],
-                         laugh['file'], laugh['via'],
-                         'http://example.com')
+
+@app.route("/")
+def index():
+    return "hi."
+
+
+@app.route("/joke", methods=['GET', 'POST'])
+def tell_joke():
+    joke = random.choice(jokes)
+    laugh = random.choice(laughs)
+
+    rv = make_joke_response(joke['joke'], joke['via'],
+                            laugh['file'], laugh['via'],
+                            'http://example.com')
+    return Response(rv, mimetype='text/xml')
+
+if __name__ == "__main__":
+    # Bind to PORT if defined, otherwise default to 5000.
+    port = int(os.environ.get('PORT', 5000))
+    if port == 5000:
+        app.debug = True
+    app.run(host='0.0.0.0', port=port)
