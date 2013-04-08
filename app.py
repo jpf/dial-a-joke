@@ -69,6 +69,9 @@ def index():
 
 @app.route("/joke", methods=['GET', 'POST'])
 def tell_joke():
+    """
+    Use this route as your "SMS Request URL".
+    """
     joke = random.choice(jokes)
     laugh = random.choice(laughs)
 
